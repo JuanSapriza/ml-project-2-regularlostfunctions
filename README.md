@@ -17,6 +17,8 @@ Our objective during this project is to take a work from the State-of-the-Art an
 * Obtain the framework's figure of merits and submit to the platform.
 * Re-run the algorithm with all other standaridized-format-databases.
 
+<p align="left"><img src="docs/work-diagram.png" width="1000"></p>
+
 ## Baseline Publication
 
 To choose a baseline publication we applied the following criteria:
