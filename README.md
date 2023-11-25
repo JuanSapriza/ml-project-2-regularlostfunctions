@@ -8,19 +8,19 @@
 
 ## Introduction
 
-Machine Learning (ML) has become a popular approach for the detection of epiletic seizures from Electroencephalograms (EEG). During the last years several databases have been produced, both public and private. At the same time, abundant research has been carried out but without much consensus on the database to use, data format, cross-validation approach or figures of merit.
+Machine Learning (ML) has become a popular approach for the detection of epiletic seizures from Electroencephalograms (EEG). During the last years several datasets have been produced, both public and private. At the same time, abundant research has been carried out but without much consensus on the dataset to use, data format, cross-validation approach or figures of merit.
 In this light, the Embedded Systems Laboratory from EPFL is developing a standarization framework for seizure detection algorithms: [EPILEPSY BENCHMARKS](https://eslweb.epfl.ch/epilepsybenchmarks/framework/#tuh). Its goal is to harmonize the work of algorithm developers to offer a fair comparison between approaches.
 
 Our objectives during this project, listed in Figure 1, include taking a State-of-the-Art publication and:
 1. Reproduce its reported results.
-2. Adapt the algorithm to work with the standardized-format database.
-3. Adapt the algorithm to perform the standardized cross-valdiation approach.
+2. Adapt the algorithm to work with the standardized-format dataset.
+3. Adapt the algorithm to perform the standardized cross-validation approach.
 4. Obtain the benchmark's figure of merits.
 5. Submit the results to the EPILEPSY BENCHMARKS online platform.
-6. Re-run the algorithm with all other standaridized-format databases.
+6. Re-run the algorithm with all other standaridized-format datasets.
 
 <p align="left"><img src="docs/work-diagram.png" width="1000"></p>
-Figure 1: Comparison in the workflow of comparing epileptic-seizure-detection machine learning publications, traditional approach vs. the EPILEPSY BENCHMARKS workflow. This work involves adapting a publication to fit the standards of the platform.
+Figure 1: Workflow of comparing epileptic-seizure-detection machine learning publications, traditional approach vs. the EPILEPSY BENCHMARKS workflow. This work involves adapting a publication to fit the standards of the platform.
 
 
 ---
@@ -29,8 +29,8 @@ Figure 1: Comparison in the workflow of comparing epileptic-seizure-detection ma
 
 To choose a baseline publication we applied the following criteria:
 * Performs epileptic seizure detection based on scalp EEG.
-* ML approach.
-* Validated on one of the framework's databases.
+* Uses a ML approach.
+* Validated on one of the benchmark's datasets.
 * Available code.
 
 Based on those points we chose:
