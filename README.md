@@ -9,15 +9,21 @@
 ## Introduction
 
 Machine Learning (ML) has become a popular approach for the detection of epiletic seizures from Electroencephalograms (EEG). During the last years several databases have been produced, both public and private. At the same time, abundant research has been carried out but without much consensus on the database to use, data format, cross-validation approach or figures of merit.
-In this light, the Embedded Systems Laboratory from EPFL is developing a standarization framework for seizure detection algorithms: EPILEPSY BENCHMARKS. Its goal is to harmonize the work of algorithm developers to offer a fair comparison between approaches.
-Our objective during this project is to take a work from the State-of-the-Art and:
-* Reproduce its reported results
-* Adapt the algorithm to work with one of the standardized-format-databases
-* Adapt the algorithm to perform the standardized cross-valdiation approach
-* Obtain the framework's figure of merits and submit to the platform.
-* Re-run the algorithm with all other standaridized-format-databases.
+In this light, the Embedded Systems Laboratory from EPFL is developing a standarization framework for seizure detection algorithms: [EPILEPSY BENCHMARKS](https://eslweb.epfl.ch/epilepsybenchmarks/framework/#tuh). Its goal is to harmonize the work of algorithm developers to offer a fair comparison between approaches.
+
+Our objectives during this project, listed in Figure 1, include taking a State-of-the-Art publication and:
+1. Reproduce its reported results.
+2. Adapt the algorithm to work with the standardized-format database.
+3. Adapt the algorithm to perform the standardized cross-valdiation approach.
+4. Obtain the benchmark's figure of merits.
+5. Submit the results to the EPILEPSY BENCHMARKS online platform.
+6. Re-run the algorithm with all other standaridized-format databases.
 
 <p align="left"><img src="docs/work-diagram.png" width="1000"></p>
+Figure 1: Comparison in the workflow of comparing epileptic-seizure-detection machine learning publications, traditional approach vs. the EPILEPSY BENCHMARKS workflow. This work involves adapting a publication to fit the standards of the platform.
+
+
+---
 
 ## Baseline Publication
 
