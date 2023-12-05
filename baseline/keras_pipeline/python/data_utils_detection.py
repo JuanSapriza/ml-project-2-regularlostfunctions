@@ -10,7 +10,37 @@ from tqdm import tqdm
 from utils.file_utils import load_file
 
 
+import sys
+sys.path.append("../../framework/")
+
+from dataIo import eeg
+from dataIo import annotations as annot
 #-------------------------------------------------------------------------------
+
+
+# Reduced (from the one named _old bellow) because a) There where some repeated channels and b) the converter was not finding them inside the edf files
+ELECTRODES_CHB01 = (
+"FP1-F7",
+"F7-T7",
+"T7-P7",
+"P7-O1",
+"FP1-F3",
+"F3-C3",
+"C3-P3",
+"P3-O1",
+"FP2-F4",
+"F4-C4",
+"C4-P4",
+"P4-O2",
+"FP2-F8",
+"F8-T8",
+"T8-P8",
+"P8-O2",
+"FZ-CZ",
+"CZ-PZ",
+)
+
+
 
 
 class RawRecurrentDataGenerator:
@@ -67,7 +97,7 @@ class RawRecurrentDataGenerator:
 
             :param boolean balance_batches:
                 Flag to indicate whether to balance the batches.
-            
+
             :param string patient_id:
                 String to indicate the patient id. It is used to save the statistics file.
 
@@ -78,6 +108,9 @@ class RawRecurrentDataGenerator:
             raise Exception('You have to specify a patient id, i.e. "chb01"')
 
         self.sampling_rate = sampling_rate
+        self.num_channels = 23
+
+
         self.batch_size = batch_size
         self.do_standard_scaling = do_standard_scaling
         self.in_training_mode = in_training_mode
@@ -87,18 +120,18 @@ class RawRecurrentDataGenerator:
         self.window_length = window_length * sampling_rate
         self.sample_shift = int(sampling_rate * shift) # Half of sample length
         self.timesteps = timesteps
-        self.num_channels = 23
         #
         self.input_shape = None
         self.num_batches = 0
         #
-        self.filenames = list()
-        for fname in index_filenames:
-            with open(fname, 'r') as f:
-                for l in f:
-                    if l[0] != '#':
-                        self.filenames.append(l.strip() + '.edf.pbz2')
-                f.close()
+        # self.filenames = list()
+        # for fname in index_filenames:
+        #     with open(fname, 'r') as f:
+        #         for l in f:
+        #             if l[0] != '#':
+        #                 #self.filenames.append(l.strip() + '.edf.pbz2')
+        #                 self.filenames.append(l.strip() + '.edf')
+        #         f.close()
         #
         # List to store the data separated by files
         self.data = list()
@@ -110,13 +143,30 @@ class RawRecurrentDataGenerator:
         num_ictal = 0
         num_interictal = 0
 
-        print("Loading EDF signals...")
-        for i in tqdm(range(len(self.filenames))):
+        # HERE!
+        # print(self.filenames)
+        print("Loading EDF signals...!")
+        # for i in tqdm(range(len(self.filenames))):
+        for i in range(1):
+
+            sub = "01"
+            ses = "01"
+            run = "03"
+            filename = "../baseline/clean_signals/sub-01/ses-01/eeg/sub-"+sub+"_ses-"+ses+"_task-szMonitoring_run-"+run
+            # Physionet CHB-MIT is currently the only known dataset to only provide data in a bipolar montage
+            data = eeg.Eeg.loadEdf( filename + ".edf", montage=eeg.Eeg.Montage.BIPOLAR, electrodes=ELECTRODES_CHB01 )
+            annots = annot.Annotations.loadTsv(filename + "_events.tsv")
+
+            d_p = load_file_standard(data, annots)
+            print(d_p, file=sys.stdout)
+
+            return
+
             d_p = load_file(self.filenames[i],
                             exclude_seizures = False,
                             do_preemphasis = False,
                             separate_seizures = True,
-                            verbose = 0)
+                            verbose = 1)
 
             len_file = 0
 
@@ -142,9 +192,9 @@ class RawRecurrentDataGenerator:
         for i in range(len(self.data)):
             limit = len(self.data[i]) // self.sample_shift
             limit -= self.timesteps + 1
-            limit = (limit * self.sample_shift) # - self.sample_shift 
+            limit = (limit * self.sample_shift) # - self.sample_shift
             self.file_indexes.append(numpy.arange(0, limit, step = self.sample_shift).tolist())
-        #     
+        #
 
 
         num_sequences_per_class = [0, 0]
@@ -167,7 +217,7 @@ class RawRecurrentDataGenerator:
                         self.sequences_indexes_c1.append((fi, t))
                 #
             #
-            
+
             num_sequences_per_class[0] = len(self.sequences_indexes_c0)
             num_sequences_per_class[1] = len(self.sequences_indexes_c1)
             num_sequences = num_sequences_per_class[0] + num_sequences_per_class[1]
@@ -182,7 +232,7 @@ class RawRecurrentDataGenerator:
 
             for fi in range(len(self.file_indexes)):
                 for t in self.file_indexes[fi]:
-                    
+
                     label = self.labels[fi][t + (self.timesteps + 1) * self.sample_shift - 1]
                     num_sequences_per_class[label] += 1
 
@@ -217,7 +267,7 @@ class RawRecurrentDataGenerator:
 
         # Standard scaling
         if self.do_standard_scaling:
-            
+
             os.makedirs('stats', exist_ok=True)
 
             if self.in_training_mode:
@@ -243,7 +293,7 @@ class RawRecurrentDataGenerator:
                 del means
                 del counts
                 del stddevs
-                
+
             #
             else:
                 print('Loading statistics to scale the data...')
@@ -265,9 +315,9 @@ class RawRecurrentDataGenerator:
 
         :return: The number of batches available in the current object.
         '''
-        
+
         return self.num_batches
-    
+
 
     def shuffle_data(self):
         '''
@@ -295,7 +345,7 @@ class RawRecurrentDataGenerator:
 
         :return: A tuple with two objects, a batch of samples and the corresponding labels.
         '''
-        
+
         X = list()
         Y = list()
 
@@ -314,12 +364,12 @@ class RawRecurrentDataGenerator:
                 # 'fi' is the index of the file in self.data, self.file_indexes and self.labels
                 fi, t = self.sequences_indexes_c0[idx]
 
-                
+
 
                 for i in numpy.arange(t, t + (self.timesteps + 1) * self.sample_shift, step = self.sample_shift):
                     sequence_samples.append(self.data[fi][i : i + self.sampling_rate, :])
                     #label = self.labels[fi][i + self.sampling_rate - 1]
-                
+
                 label = 0 # It always will be 0 here
 
                 X.append(sequence_samples)
@@ -327,7 +377,7 @@ class RawRecurrentDataGenerator:
 
             # Class 1 sequences of samples
             for sequence in range(half_batch):
-                
+
                 idx = batch_index * self.batch_size + sequence
                 idx = idx % len(self.sequences_indexes_c1)
 
@@ -339,7 +389,7 @@ class RawRecurrentDataGenerator:
                 for i in numpy.arange(t, t + (self.timesteps + 1) * self.sample_shift, step = self.sample_shift):
                     sequence_samples.append(self.data[fi][i : i + self.sampling_rate, :])
                     #label = self.labels[fi][i + self.sampling_rate - 1]
-                
+
                 label = 1 # It always will be 1 here
 
                 X.append(sequence_samples)
@@ -353,7 +403,7 @@ class RawRecurrentDataGenerator:
                 sequence_samples = list()
                 # 'fi' is the index of the file in self.data, self.file_indexes and self.labels
                 #fi, channel, t = self.sequences_indexes[idx]
-                
+
                 if self.in_training_mode:
                     # Fill last batch with samples that have already been passed
                     # through the net in the same epoch
@@ -363,7 +413,7 @@ class RawRecurrentDataGenerator:
                     for i in numpy.arange(t, t + (self.timesteps + 1) * self.sample_shift, step = self.sample_shift):
                         sequence_samples.append(self.data[fi][i : i + self.sampling_rate, :])
                         #label = self.labels[fi][i + self.sampling_rate - 1]
-                
+
                 else:
                     # Do not drop last batch. It will have less samples than batch-size
                     # This will be done when validation and test
@@ -386,7 +436,7 @@ class RawRecurrentDataGenerator:
 
         if self.do_standard_scaling:
             X = (X - self.mean) / self.std
-        
+
         if X.min() < -20. or X.max() > 20.:
             #print("#  ", file = sys.stderr)
             #print("#  WARNING: too large values after scaling while getting batch %d" % batch_index, file = sys.stderr)
