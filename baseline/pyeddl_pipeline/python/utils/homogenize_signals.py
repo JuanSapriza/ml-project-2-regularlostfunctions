@@ -57,7 +57,7 @@ def process_metadata(summary, filename):
 
             metadata['seizures']=seizures
             metadata['times']=times
-    
+
     return metadata
 
 
@@ -68,7 +68,7 @@ def process_reference_file(filename):
 
     :param string filename
         Name of the reference file.
-    
+
     :return list signal_reference
         List with the names of the reference file signals.
 
@@ -92,7 +92,7 @@ def process_reference_file(filename):
                     name = name + '_2'
                 signal_reference.append(name)
 
-    
+
     return signal_reference
 
 
@@ -115,7 +115,7 @@ def process_file(filename,  signal_reference, store_path):
     :return None
 
     """
-    
+
     ignore_list = ['chb13_04.edf', 'chb12_27.edf', 'chb12_28.edf', 'chb12_29.edf', 'chb15_01.edf']
 
     dir_patient = os.path.dirname(filename)
@@ -145,7 +145,7 @@ def process_file(filename,  signal_reference, store_path):
                     signal_names.append(name)
                 else:
                     signal_names.append(name + '_2')
-            
+
             for i in range(len(signal_names)):
                 if signal_names[i] in signal_reference:
                     signal_dict[signal_names[i]]=signals[i]
@@ -159,8 +159,8 @@ def process_file(filename,  signal_reference, store_path):
 
 if __name__=='__main__':
 
-    signals_path = '../../UC13/physionet.org/files/chbmit/1.0.0' # Path to the data main directory
-    clean_path = '../clean_signals' # Path where to store clean data
+    signals_path = '/shares/eslfiler1/databases/medical/physionet/files/chbmit/1.0.0' # Path to the data main directory
+    clean_path = '../../clean_signals' # Path where to store clean data
 
     for i in range(1, len(sys.argv)):
         if sys.argv[i] == '--signals-path':
