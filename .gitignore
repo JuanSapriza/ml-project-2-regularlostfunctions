@@ -1,0 +1,6 @@
+*__pycache__*
+*/env/*
+baseline/keras_pipeline/clean_signals/chb*
+*.log
+log/*
+*.h5

@@ -1,0 +1,129 @@
+2023-12-07 11:35:12.020171: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-12-07 11:35:14.689558: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+
+
+Creating Training Data Generator...
+
+100%|██████████| 6/6 [00:35<00:00,  5.99s/it]
+2023-12-07 11:38:37.476369: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1960] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+
+Training epoch 1 of 10...
+
+  0%|          | 0/2789 [00:00<?, ?it/s]
+Training[loss=0.99158, acc=0.50000]:   0%|          | 0/2789 [00:02<?, ?it/s]
+Training[loss=0.02118, acc=0.99095]: 100%|██████████| 2789/2789 [2:03:03<00:00,  2.65s/it]
+
+Validation epoch 1...
+
+  0%|          | 0/671 [00:00<?, ?it/s]
+
+100%|██████████| 671/671 [45:34<00:00,  4.07s/it]
+***************************************************************
+
+Epoch 1: Validation results
+
+ -- Single channel results (no combination of channels) --
+
+Validation acc : 0.9334098190187873
+Validation macro f1-score : 0.8312290098488548
+Confussion matrix:
+[[844354  60006]
+ [  5697  76620]]
+
+Classification report:
+              precision    recall  f1-score   support
+
+         0.0       0.99      0.93      0.96    904360
+         1.0       0.56      0.93      0.70     82317
+
+    accuracy                           0.93    986677
+   macro avg       0.78      0.93      0.83    986677
+weighted avg       0.96      0.93      0.94    986677
+
+
+--------------------------------------------------------------
+
+ -- All channels involved (combined for each timestamp) --
+
+Validation acc : 0.9990675773328049
+Validation macro f1-score : 0.9969360277680921
+Confussion matrix:
+[[39320     0]
+ [   40  3539]]
+
+Classification report:
+              precision    recall  f1-score   support
+
+         0.0       1.00      1.00      1.00     39320
+         1.0       1.00      0.99      0.99      3579
+
+    accuracy                           1.00     42899
+   macro avg       1.00      0.99      1.00     42899
+weighted avg       1.00      1.00      1.00     42899
+
+***************************************************************
+
+
+/home/sapriza/projects/ml-project2/baseline/env/lib/python3.10/site-packages/keras/src/engine/training.py:3000: UserWarning: You are saving your model as an HDF5 file via `model.save()`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')`.
+  saving_api.save_model(
+
+Training epoch 2 of 10...
+
+  0%|          | 0/2789 [00:00<?, ?it/s]
+Training[loss=0.02118, acc=0.99095]:   0%|          | 0/2789 [00:00<?, ?it/s]
+
+
+
+
+
+
+
+
+Epoch 10: Validation results
+
+ -- Single channel results (no combination of channels) --
+
+Validation acc : 0.9488130360796897
+Validation macro f1-score : 0.8620433732653228
+Confussion matrix:
+[[859339  45021]
+ [  5484  76833]]
+
+Classification report:
+              precision    recall  f1-score   support
+
+         0.0       0.99      0.95      0.97    904360
+         1.0       0.63      0.93      0.75     82317
+
+    accuracy                           0.95    986677
+   macro avg       0.81      0.94      0.86    986677
+weighted avg       0.96      0.95      0.95    986677
+
+
+--------------------------------------------------------------
+
+ -- All channels involved (combined for each timestamp) --
+
+Validation acc : 0.9987412293992867
+Validation macro f1-score : 0.9958562231984442
+Confussion matrix:
+[[39320     0]
+ [   54  3525]]
+
+Classification report:
+              precision    recall  f1-score   support
+
+         0.0       1.00      1.00      1.00     39320
+         1.0       1.00      0.98      0.99      3579
+
+    accuracy                           1.00     42899
+   macro avg       1.00      0.99      1.00     42899
+weighted avg       1.00      1.00      1.00     42899
+
+***************************************************************
+
+
+/home/sapriza/projects/ml-project2/baseline/env/lib/python3.10/site-packages/keras/src/engine/training.py:3000: UserWarning: You are saving your model as an HDF5 file via `model.save()`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')`.
+  saving_api.save_model(
