@@ -2,5 +2,8 @@
 */env/*
 baseline/keras_pipeline/clean_signals/chb*
 *.log
-log/*
+*log/*
 *.h5
+*indexes_detection*
+.err
+.out
