@@ -92,17 +92,16 @@ def main(args):
                           patient_id=patient_id)
     #
 
+    print('\n\nCreating Validation Data Generator...', file=sys.stderr)
+    dg_val = RawRecurrentDataGenerator(index_filenames=index_validation,
+                          window_length=args.window_length,
+                          shift=args.shift,
+                          timesteps=args.timesteps,
+                          sampling_rate=256, # in Hz
+                          batch_size=batch_size,
+                          in_training_mode=False,
+                          patient_id=patient_id)
 
-    segments                = 10 # Number of CV segments
-    max_segments_in_history = 3
-    batches_per_segm        = int(len(dg)/segments)
-
-    initial_segments = max_segments_in_history*(max_segments_in_history+1)/2 # Number of segments that will be computed during the initial stage
-    regime_segments = (segments - max_segments_in_history -1)*max_segments_in_history # Number of segments that will be computed during the rest
-    validation_segments = segments -1 # Number of segments that will be run for validation (approximated, as the time is not the same)
-    batch_time = 2.5
-    segment_time = batches_per_segm * batch_time
-    print(f'\nEstimated Total Training time time: {segment_time*(initial_segments+regime_segments+validation_segments)/3600:02f} hours\n', file=sys.stderr)
 
     # Get input shape
     x, y = dg[0]
@@ -141,41 +140,34 @@ def main(args):
     # Log files
     log_filename = f'{exp_dir}/training.log'
     logger = open(log_filename, 'a')
-    logger.write('segment, train_acc, train_loss, val_acc, '
+    logger.write('epoch, train_acc, train_loss, val_acc, '
                 + 'val_loss, val_f1score, val_acc_combined_channels, val_f1score_combined_channels\n')
 
     logger.flush()
 
 
     best_val_score = 0.0
-    seg_scores = []
-    acc = 0
-    fsc = 0
-    fsc_i = 0
+
+
+
+
+
 
 
     # Train the model
-    for seg in range(segments):
+    for epoch in range(starting_epoch, epochs):
 
-        print(f'\nTraining segment {seg}/{segments-1}...', file=sys.stderr)
+        print(f'\nTraining epoch {epoch+1} of {epochs}...', file=sys.stderr)
         print(f'\nNO DATA SHUFFLING!!!!', file=sys.stderr)
         #RLF############################################################################################
         ############# dg.shuffle_data()
 
-
-
-        first_segment_of_block = max(0, seg - max_segments_in_history)*batches_per_segm
-        last_segment_of_block = (seg+1)*batches_per_segm
-        print(f'\nSegments: {max(0, seg - max_segments_in_history)}({seg}-{max_segments_in_history}) - {seg+1}\n', file=sys.stderr)
-        print(f'\nBatches in these segments: {first_segment_of_block} - {last_segment_of_block}\n', file=sys.stderr)
-        print(f'\nEstimated time: {2.5*(last_segment_of_block-first_segment_of_block)/3600:02f} hours\n', file=sys.stderr)
-
         # Set a progress bar for the training loop
-        pbar = tqdm(range(first_segment_of_block, last_segment_of_block))
+        pbar = tqdm(range(len(dg)))
 
         for i in pbar:
             # Load batch of data
-            x, y = dg[ seg*batches_per_segm + i]
+            x, y = dg[i]
 
             y = keras.utils.to_categorical(y, num_classes=2)
 
@@ -186,18 +178,18 @@ def main(args):
                 outputs = model.train_on_batch(x_channel, y=y, reset_metrics=False)
 
             pbar.set_description(f'Training[loss={outputs[0]:.5f}, acc={outputs[1]:.5f}]')
-            #
+        #
 
-            #RLF############################################################################################
-            ########### THESE ARE ONLY THE RESULTS OF THE LAST CHANNEL!
+        #RLF############################################################################################
+        ########### THESE ARE ONLY THE RESULTS OF THE LAST CHANNEL!
 
-            # Store training results
-            train_loss = outputs[0]
-            train_acc = outputs[1]
+        # Store training results
+        train_loss = outputs[0]
+        train_acc = outputs[1]
 
 
         # Validation
-        print(f'\nValidation with segment {seg+1}...', file=sys.stderr)
+        print(f'\nValidation epoch {epoch+1}...', file=sys.stderr)
 
         Y_true_single_channel = list()
         Y_pred_single_channel = list()
@@ -206,8 +198,8 @@ def main(args):
 
         accumulated_loss = 0.0
 
-        for j in tqdm(range(batches_per_segm)):
-            x, y = dg[ last_segment_of_block + j ]
+        for j in tqdm(range(len(dg_val))):
+            x, y = dg_val[j]
 
             y = keras.utils.to_categorical(y, num_classes=2)
 
@@ -240,7 +232,7 @@ def main(args):
         y_pred_single_channel = numpy.array(Y_pred_single_channel) * 1.0
 
         # Calculate validation loss
-        val_loss = accumulated_loss / len(dg)
+        val_loss = accumulated_loss / len(dg_val)
 
         # Calculate other metrics
         val_accuracy_single_channel = sum(y_true_single_channel == y_pred_single_channel) / len(y_true_single_channel)
@@ -250,7 +242,7 @@ def main(args):
 
 
         print('***************************************************************\n', file=sys.stderr)
-        print(f'Segment {seg}: Validation results\n', file=sys.stderr)
+        print(f'Epoch {epoch + 1}: Validation results\n', file=sys.stderr)
         print(' -- Single channel results (no combination of channels) --\n', file=sys.stderr)
         print(f'Validation acc : {val_accuracy_single_channel}', file=sys.stderr)
         print(f'Validation macro f1-score : {fscore_single_channel}', file=sys.stderr)
@@ -265,7 +257,6 @@ def main(args):
         cnf_matrix = confusion_matrix(y_true, y_pred)
         report = classification_report(y_true, y_pred)
         fscore = f1_score(y_true, y_pred, labels=[0, 1], average='macro')
-        fscore_i = f1_score(y_true, y_pred, labels=[1, 0], average='macro')
 
         print(' -- All channels involved (combined for each timestamp) --\n', file=sys.stderr)
         print(f'Validation acc : {val_accuracy}', file=sys.stderr)
@@ -277,13 +268,7 @@ def main(args):
         print('***************************************************************\n\n', file=sys.stderr)
 
 
-        acc += val_accuracy
-        fsc += fscore
-        fsc_i += fscore_i
-
-        seg_scores.append( [(val_accuracy,cnf_matrix, report, fscore, fscore_i) ] )
-
-        logger.write('%d,%g,%g,%g,%g,%g,%g,%g\n' % (seg, train_acc, train_loss,
+        logger.write('%d,%g,%g,%g,%g,%g,%g,%g\n' % (epoch, train_acc, train_loss,
             val_accuracy_single_channel, val_loss, fscore_single_channel,
             val_accuracy, fscore))
 
@@ -293,25 +278,11 @@ def main(args):
         if val_accuracy > best_val_score:
             # Save best model if score is improved
             best_val_score = val_accuracy
-            model.save(f'{model_dir}/{model_id}_best_epoch' + f'_{seg:04d}_{val_accuracy:.4f}.h5')
+            model.save(f'{model_dir}/{model_id}_best_epoch' + f'_{epoch:04d}_{val_accuracy:.4f}.h5')
 
         # Save last model
         model.save(f'{model_dir}/{model_id}_last.h5')
 
-    print("#################################################################\n", file=sys.stderr)
-
-
-    acc         /= (segments -1)
-    fsc         /= (segments -1)
-    fsc_i       /= (segments -1)
-
-
-    print(f"Accuracy:\t{acc*100:02f}%\n",file=sys.stderr)
-    print(f"F1 score:\t{fsc:04f}\n",file=sys.stderr)
-    print(f"F1i score:\t{fsc_i:04f}\n",file=sys.stderr)
-
-    print("#################################################################\n", file=sys.stderr)
-    print(seg_scores, file=sys.stderr)
 
 
 

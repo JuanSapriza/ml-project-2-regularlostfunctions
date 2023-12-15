@@ -1,7 +1,7 @@
 """
     Script for testing recurrent neural network models to perform
     the detection of Epilepsy Seizures on a EEG signal. This task is part of the
-    Use Case 13 of DeepHealth project. 
+    Use Case 13 of DeepHealth project.
 
     This script uses Keras toolkit to test the neural network models.
 
@@ -48,7 +48,7 @@ def calculate_detection_metrics(y_true,
 
         :param float sample_shift:
             The number of seconds that represent a time step.
-            If betweeen the samples you shift half second, you have two 
+            If betweeen the samples you shift half second, you have two
             predictions each second. Therefore, sample_shift will be 0.5
 
         :param int sliding_window_length:
@@ -56,11 +56,11 @@ def calculate_detection_metrics(y_true,
             of an alarm or not.
 
         :param float alpha_pos:
-            Minimum percentage of the analysis window to be predicted as 
+            Minimum percentage of the analysis window to be predicted as
             positive to trigger a transition between normal state to ictal state.
 
         :param float alpha_neg:
-            Maximum percentage of the analysis window to be predicted as 
+            Maximum percentage of the analysis window to be predicted as
             negative to trigger a transition between ictal state to normal state.
 
         :param int detection_threshold:
@@ -71,7 +71,7 @@ def calculate_detection_metrics(y_true,
             Tuple with the calculated metrics.
 
     """
-    
+
     assert len(y_true) == len(y_pred)
 
 
@@ -183,7 +183,7 @@ def calculate_detection_metrics(y_true,
 
 
 def main(args):
-    
+
     """
         Test a model of a patient in the detection of seizures.
     """
@@ -193,14 +193,16 @@ def main(args):
     patient_id = args.id
     model_id = args.model
     batch_size = args.batch_size
-    gpus = args.gpus
+    #RLF####################################################
+    # The test function did not work.
+    #gpus = args.gpus
     exp_dir = args.dir
 
     # Create Data Generator object for the test set
     print('Creating Test Data Generator...', file=sys.stderr)
     dg_test = RawRecurrentDataGenerator(index_filenames=index_test,
                           window_length = 1,
-                          shift = 0.5, 
+                          shift = 0.5,
                           timesteps = 19,
                           sampling_rate = 256, # in Hz
                           batch_size=batch_size,
@@ -241,7 +243,7 @@ def main(args):
 
     for j in tqdm(range(len(dg_test))):
         x, y = dg_test[j]
-        
+
         channels_y_pred = list()
         for channel in range(x.shape[3]):
             x_channel = x[:, :, :, channel]
@@ -252,12 +254,12 @@ def main(args):
             channels_y_pred.append(y_pred)
             Y_pred_single_channel += y_pred.argmax(axis=1).tolist()
             Y_true_single_channel += y.tolist()
-        
+
         channels_y_pred = numpy.array(channels_y_pred)
         # (23, batch_size, 2)
         channels_y_pred = numpy.sum(channels_y_pred, axis=0)
         # print(channels_y_pred.shape) -> (batch_size, 2)
-        
+
         Y_true += y.tolist()
         Y_pred += channels_y_pred.argmax(axis=1).tolist()
     #
@@ -267,14 +269,14 @@ def main(args):
     y_true_single_channel = numpy.array(Y_true_single_channel) * 1.0
     y_pred_single_channel = numpy.array(Y_pred_single_channel) * 1.0
 
-    
+
     # Calculate and print basic metrics
 
     test_accuracy_single_channel = sum(y_true_single_channel == y_pred_single_channel) / len(y_true_single_channel)
     cnf_matrix = confusion_matrix(y_true_single_channel, y_pred_single_channel)
     report = classification_report(y_true_single_channel, y_pred_single_channel)
     fscore_single_channel = f1_score(y_true_single_channel, y_pred_single_channel, labels=[0, 1], average='macro')
-    
+
     print('***************************************************************\n', file=sys.stderr)
     print(f'Test results\n', file=sys.stderr)
     print(' -- Single channel results (no combination of channels) --\n', file=sys.stderr)
@@ -299,10 +301,10 @@ def main(args):
     print(f'{cnf_matrix}\n', file=sys.stderr)
     print('Classification report:', file=sys.stderr)
     print(report, file=sys.stderr)
-    
+
     print('\n--------------------------------------------------------------\n', file=sys.stderr)
 
-    # Calculate and print other metrics: 
+    # Calculate and print other metrics:
     acc_window, latency, fp_h, recall = calculate_detection_metrics(
                                         y_true,
                                         y_pred,
@@ -328,13 +330,13 @@ def main(args):
 if __name__ == '__main__':
 
     # Get arguments
-    parser = argparse.ArgumentParser(description='Script for training recurrent models' + 
+    parser = argparse.ArgumentParser(description='Script for training recurrent models' +
         ' to detect epilepsy on UC13. \nThis script loads the best model '
         + 'saved in the experiments directory specified and performs the inference, '
-        + 'returning the obtained metrics.', 
+        + 'returning the obtained metrics.',
         formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument('--index', help='Index of recordings to use for testing. ' + 
+    parser.add_argument('--index', help='Index of recordings to use for testing. ' +
                         'Example: "../indexes_detection/chb01/test.txt"')
 
     parser.add_argument('--id', help='Id of the patient, e.g. "chb01".', required=True)
@@ -349,7 +351,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch-size', type=int, help='Batch size.',
         default=10)
 
-    parser.add_argument('--gpu', help='Id of the gpu to use.'+ 
+    parser.add_argument('--gpu', help='Id of the gpu to use.'+
         ' Usage --gpu 0', default='0')
 
 
@@ -365,7 +367,7 @@ if __name__ == '__main__':
         + ' positive predicted samples in the sliding window for triggering'
         + ' a transition between normal state to ictal state. Default -> 0.4',
         default=0.4)
-    
+
     parser.add_argument('--alpha-neg', type=float, help='Maximum rate of'
         + ' positive predicted samples in the sliding window for triggering'
         + ' a transition between normal state to ictal state. Default -> 0.4',
