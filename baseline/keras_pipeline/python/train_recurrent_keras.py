@@ -94,7 +94,7 @@ def main(args):
 
 
     segments                = 10 # Number of CV segments
-    max_segments_in_history = 3
+    max_segments_in_history = 10
     batches_per_segm        = int(len(dg)/segments)
 
     initial_segments = max_segments_in_history*(max_segments_in_history+1)/2 # Number of segments that will be computed during the initial stage
@@ -106,10 +106,7 @@ def main(args):
 
     # Get input shape
     x, y = dg[0]
-    #print(x.shape)
     input_shape = x.shape[1:-1]
-    #print(input_shape)
-
 
     # Create or Load the model
 
@@ -133,10 +130,8 @@ def main(args):
     else:
         # Load model, already compiled and with the optimizer state preserved
         model = keras.models.load_model(model_filename)
-    #
 
     model.summary()
-
 
     # Log files
     log_filename = f'{exp_dir}/training.log'
@@ -196,107 +191,108 @@ def main(args):
             train_acc = outputs[1]
 
 
-        # Validation
-        print(f'\nValidation with segment {seg+1}...', file=sys.stderr)
+        if segments > 1:
+            # Validation
+            print(f'\nValidation with segment {seg+1}...', file=sys.stderr)
 
-        Y_true_single_channel = list()
-        Y_pred_single_channel = list()
-        Y_true = list()
-        Y_pred = list()
+            Y_true_single_channel = list()
+            Y_pred_single_channel = list()
+            Y_true = list()
+            Y_pred = list()
 
-        accumulated_loss = 0.0
+            accumulated_loss = 0.0
 
-        for j in tqdm(range(batches_per_segm)):
-            x, y = dg[ last_segment_of_block + j ]
+            for j in tqdm(range(batches_per_segm)):
+                x, y = dg[ last_segment_of_block + j ]
 
-            y = keras.utils.to_categorical(y, num_classes=2)
+                y = keras.utils.to_categorical(y, num_classes=2)
 
-            channels_y_pred = list()
-            for channel in range(x.shape[3]):
-                x_channel = x[:, :, :, channel]
+                channels_y_pred = list()
+                for channel in range(x.shape[3]):
+                    x_channel = x[:, :, :, channel]
 
-                # Forward and backward of the channel through the net
-                y_pred = model.predict(x_channel)
+                    # Forward and backward of the channel through the net
+                    y_pred = model.predict(x_channel)
 
-                accumulated_loss += keras.losses.CategoricalCrossentropy()(y, y_pred)
+                    accumulated_loss += keras.losses.CategoricalCrossentropy()(y, y_pred)
 
-                channels_y_pred.append(y_pred)
-                Y_pred_single_channel += y_pred.argmax(axis=1).tolist()
-                Y_true_single_channel += y.argmax(axis=1).tolist()
+                    channels_y_pred.append(y_pred)
+                    Y_pred_single_channel += y_pred.argmax(axis=1).tolist()
+                    Y_true_single_channel += y.argmax(axis=1).tolist()
+                #
+                channels_y_pred = numpy.array(channels_y_pred)
+                # (23, batch_size, 2)
+                channels_y_pred = numpy.sum(channels_y_pred, axis=0)
+                channels_y_pred = channels_y_pred / 23.0
+                # print(channels_y_pred.shape) -> (batch_size, 2)
+
+                Y_true += y.argmax(axis=1).tolist()
+                Y_pred += channels_y_pred.argmax(axis=1).tolist()
             #
-            channels_y_pred = numpy.array(channels_y_pred)
-            # (23, batch_size, 2)
-            channels_y_pred = numpy.sum(channels_y_pred, axis=0)
-            channels_y_pred = channels_y_pred / 23.0
-            # print(channels_y_pred.shape) -> (batch_size, 2)
 
-            Y_true += y.argmax(axis=1).tolist()
-            Y_pred += channels_y_pred.argmax(axis=1).tolist()
-        #
+            y_true = numpy.array(Y_true) * 1.0
+            y_pred = numpy.array(Y_pred) * 1.0
+            y_true_single_channel = numpy.array(Y_true_single_channel) * 1.0
+            y_pred_single_channel = numpy.array(Y_pred_single_channel) * 1.0
 
-        y_true = numpy.array(Y_true) * 1.0
-        y_pred = numpy.array(Y_pred) * 1.0
-        y_true_single_channel = numpy.array(Y_true_single_channel) * 1.0
-        y_pred_single_channel = numpy.array(Y_pred_single_channel) * 1.0
+            # Calculate validation loss
+            val_loss = accumulated_loss / len(dg)
 
-        # Calculate validation loss
-        val_loss = accumulated_loss / len(dg)
-
-        # Calculate other metrics
-        val_accuracy_single_channel = sum(y_true_single_channel == y_pred_single_channel) / len(y_true_single_channel)
-        cnf_matrix = confusion_matrix(y_true_single_channel, y_pred_single_channel)
-        report = classification_report(y_true_single_channel, y_pred_single_channel)
-        fscore_single_channel = f1_score(y_true_single_channel, y_pred_single_channel, labels=[0, 1], average='macro')
+            # Calculate other metrics
+            val_accuracy_single_channel = sum(y_true_single_channel == y_pred_single_channel) / len(y_true_single_channel)
+            cnf_matrix = confusion_matrix(y_true_single_channel, y_pred_single_channel)
+            report = classification_report(y_true_single_channel, y_pred_single_channel)
+            fscore_single_channel = f1_score(y_true_single_channel, y_pred_single_channel, labels=[0, 1], average='macro')
 
 
-        print('***************************************************************\n', file=sys.stderr)
-        print(f'Segment {seg}: Validation results\n', file=sys.stderr)
-        print(' -- Single channel results (no combination of channels) --\n', file=sys.stderr)
-        print(f'Validation acc : {val_accuracy_single_channel}', file=sys.stderr)
-        print(f'Validation macro f1-score : {fscore_single_channel}', file=sys.stderr)
-        print('Confussion matrix:', file=sys.stderr)
-        print(f'{cnf_matrix}\n', file=sys.stderr)
-        print('Classification report:', file=sys.stderr)
-        print(report, file=sys.stderr)
+            print('***************************************************************\n', file=sys.stderr)
+            print(f'Segment {seg}: Validation results\n', file=sys.stderr)
+            print(' -- Single channel results (no combination of channels) --\n', file=sys.stderr)
+            print(f'Validation acc : {val_accuracy_single_channel}', file=sys.stderr)
+            print(f'Validation macro f1-score : {fscore_single_channel}', file=sys.stderr)
+            print('Confussion matrix:', file=sys.stderr)
+            print(f'{cnf_matrix}\n', file=sys.stderr)
+            print('Classification report:', file=sys.stderr)
+            print(report, file=sys.stderr)
 
-        print('\n--------------------------------------------------------------\n', file=sys.stderr)
+            print('\n--------------------------------------------------------------\n', file=sys.stderr)
 
-        val_accuracy = sum(y_true == y_pred) / len(y_true)
-        cnf_matrix = confusion_matrix(y_true, y_pred)
-        report = classification_report(y_true, y_pred)
-        fscore = f1_score(y_true, y_pred, labels=[0, 1], average='macro')
-        fscore_i = f1_score(y_true, y_pred, labels=[1, 0], average='macro')
+            val_accuracy = sum(y_true == y_pred) / len(y_true)
+            cnf_matrix = confusion_matrix(y_true, y_pred)
+            report = classification_report(y_true, y_pred)
+            fscore = f1_score(y_true, y_pred, labels=[0, 1], average='macro')
+            fscore_i = f1_score(y_true, y_pred, labels=[1, 0], average='macro')
 
-        print(' -- All channels involved (combined for each timestamp) --\n', file=sys.stderr)
-        print(f'Validation acc : {val_accuracy}', file=sys.stderr)
-        print(f'Validation macro f1-score : {fscore}', file=sys.stderr)
-        print('Confussion matrix:', file=sys.stderr)
-        print(f'{cnf_matrix}\n', file=sys.stderr)
-        print('Classification report:', file=sys.stderr)
-        print(report, file=sys.stderr)
-        print('***************************************************************\n\n', file=sys.stderr)
-
-
-        acc += val_accuracy
-        fsc += fscore
-        fsc_i += fscore_i
-
-        seg_scores.append( [(val_accuracy,cnf_matrix, report, fscore, fscore_i) ] )
-
-        logger.write('%d,%g,%g,%g,%g,%g,%g,%g\n' % (seg, train_acc, train_loss,
-            val_accuracy_single_channel, val_loss, fscore_single_channel,
-            val_accuracy, fscore))
-
-        logger.flush()
+            print(' -- All channels involved (combined for each timestamp) --\n', file=sys.stderr)
+            print(f'Validation acc : {val_accuracy}', file=sys.stderr)
+            print(f'Validation macro f1-score : {fscore}', file=sys.stderr)
+            print('Confussion matrix:', file=sys.stderr)
+            print(f'{cnf_matrix}\n', file=sys.stderr)
+            print('Classification report:', file=sys.stderr)
+            print(report, file=sys.stderr)
+            print('***************************************************************\n\n', file=sys.stderr)
 
 
-        if val_accuracy > best_val_score:
-            # Save best model if score is improved
-            best_val_score = val_accuracy
-            model.save(f'{model_dir}/{model_id}_best_epoch' + f'_{seg:04d}_{val_accuracy:.4f}.h5')
+            acc += val_accuracy
+            fsc += fscore
+            fsc_i += fscore_i
+
+            seg_scores.append( [(val_accuracy,cnf_matrix, report, fscore, fscore_i) ] )
+
+            logger.write('%d,%g,%g,%g,%g,%g,%g,%g\n' % (seg, train_acc, train_loss,
+                val_accuracy_single_channel, val_loss, fscore_single_channel,
+                val_accuracy, fscore))
+
+            logger.flush()
+
+
+            if val_accuracy > best_val_score:
+                # Save best model if score is improved
+                best_val_score = val_accuracy
+                model.save(f'{model_dir}/{model_id}_best_epoch' + f'_{seg:04d}_{val_accuracy:.4f}.h5')
 
         # Save last model
-        model.save(f'{model_dir}/{model_id}_last.h5')
+        model.save(f'{model_dir}/{model_id}_seg{seg}.h5')
 
     print("#################################################################\n", file=sys.stderr)
 
