@@ -94,7 +94,7 @@ def main(args):
 
 
     segments                = 10 # Number of CV segments
-    max_segments_in_history = 10
+    max_segments_in_history = 3
     batches_per_segm        = int(len(dg)/segments)
 
     initial_segments = max_segments_in_history*(max_segments_in_history+1)/2 # Number of segments that will be computed during the initial stage
