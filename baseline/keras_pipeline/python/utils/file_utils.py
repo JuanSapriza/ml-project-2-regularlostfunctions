@@ -28,8 +28,6 @@ def decompress_pickle(filename):
     f.close()
     return data
 
-def get_data_uncompressed(filename):
-    pass
 
 # ------------------------------------------------------------------------------
 def compress_to_pickle(filename, obj):
@@ -129,6 +127,7 @@ def load_files(filename_list,
 
     return data_pieces
 
+
 # ------------------------------------------------------------------------------
 def load_file(filename, exclude_seizures = False,
                         do_preemphasis = False,
@@ -160,15 +159,10 @@ def load_file(filename, exclude_seizures = False,
     #
     if verbose > 0:
         print('loading', filename,
-                '| excluding seizures:',exclude_seizures,
-                '| applying a preemphasis filter:', do_preemphasis)
+                'excluding seizures:',exclude_seizures,
+                'applying a preemphasis filter:', do_preemphasis)
     #
-
-
     signal_dict = decompress_pickle(filename)
-
-    # HERE!
-
     if signal_dict is None:
         return None
     metadata = signal_dict.get('metadata')
@@ -241,35 +235,6 @@ def load_file(filename, exclude_seizures = False,
     #
     return data_pieces
 
-
-
-def load_file_standard(data, annots):
-
-    data_pieces = list()
-
-    i0 = 0
-    event_idx = 0
-    while event_idx != len(annots.events):
-        # First save the space without seizure at the beginning
-        i1 = int(annots.events[event_idx]['onset']*data.fs)
-        _signal = numpy.array([data.data[:,i0:i1]]).T
-        _label = 0
-        data_pieces.append((_signal, _label))
-        i0 = i1
-        # Now save the seizure
-        i1 += int(annots.events[event_idx]['duration']*data.fs)
-        _signal = numpy.array([data.data[:,i0:i1]]).T
-        _label = 1
-        data_pieces.append((_signal, _label))
-        event_idx += 1
-        i0 = i1
-
-    # Save the last piece
-    _signal = numpy.array([data.data[:,i0:]]).T
-    _label = 0
-    data_pieces.append((_signal, _label))
-
-    return data_pieces
 
 # ------------------------------------------------------------------------------
 def load_file_eeg(filename, verbose = 0):

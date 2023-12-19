@@ -294,6 +294,11 @@ def main(args):
     report = classification_report(y_true, y_pred)
     fscore = f1_score(y_true, y_pred, labels=[0, 1], average='macro')
 
+    res = (y_true, y_pred, test_accuracy, cnf_matrix, report, fscore )
+    import pickle
+    with open( exp_dir+'res.pkl', 'wb' ) as f:
+        pickle.dump( res, f)
+
     print(' -- All channels involved (combined for each timestamp) --\n', file=sys.stderr)
     print(f'Test accuracy : {test_accuracy}', file=sys.stderr)
     print(f'Test macro f1-score : {fscore}', file=sys.stderr)
