@@ -19,7 +19,7 @@ Our objectives during this project, listed in Figure 1, include taking a State-o
 5. Submit the results to the EPILEPSY BENCHMARKS online platform.
 6. Re-run the algorithm with all other standaridized-format datasets.
 
-<p align="left"><img src="docs/work-diagram.png" width="1000"></p>
+<p align="left"><img src="docs/work-diagram-report.png" width="1000"></p>
 Figure 1: Workflow of comparing epileptic-seizure-detection machine learning publications, traditional approach vs. the EPILEPSY BENCHMARKS workflow. This work involves adapting a publication to fit the standards of the platform.
 
 
@@ -40,3 +40,19 @@ Based on those points we chose:
 
 The code, [accessible on Github](https://github.com/deephealthproject/UC13_pipeline) was cloned from commit `20b24a3`.
 
+---
+
+## Reproducibility
+
+This work's repository adapted the baseline repository to ease the process of reproducibility under the directory `baseline`. Inside it we added a `requirements.txt` file including the required python packages to be installed.
+The \chbmit data-set needs to be located as a soft link in `baseline/keras_pipeline/original_signals`.
+
+Upon accessing such link folders named after each subject containing the `edf` file of each recording with their corresponding `.edf.seizures` file.
+
+Inside `baseline/keras_pipeline`, running the  `homogenize_signals.sh` script will adapt the data-set to the format required by the rest of the processing chain and store it in a new `clean_signals` folder.
+
+Running the `train.sh` script will take the pre-defined list of subjects and train the GRU  model on the recordings listed in `baseline/indexes_detection/<subject>/train.txt` and `validation.txt`. The best models are stored in `baseline/keras_pipeline/scripts/keras_experiments` under a folder named after the `subject` and `experiment` defined in the `train.sh` script. A log file with the details of the run is generated inside the `log` folder.
+
+>Note that the final version of the repository includes a subdirectory `new` with the new proposed train/test division.
+
+The testing process is launched by running the `test.sh` script, which will look for models using the defined `subject` and `experiment` names. The testing recording are defined in a `test.txt` file along with its training counterparts.
