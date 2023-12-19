@@ -16,8 +16,9 @@ Our objectives during this project, listed in Figure 1, include taking a State-o
 2. Adapt the algorithm to work with the standardized-format dataset.
 3. Adapt the algorithm to perform the standardized cross-validation approach.
 4. Obtain the benchmark's figure of merits.
-5. Submit the results to the EPILEPSY BENCHMARKS online platform.
-6. Re-run the algorithm with all other standaridized-format datasets.
+5. Produce a standardized annotation document for submission.
+6. Submit the results to the EPILEPSY BENCHMARKS online platform.
+7. Re-run the algorithm with all other standaridized-format datasets.
 
 <p align="left"><img src="docs/work-diagram-report.png" width="1000"></p>
 Figure 1: Workflow of comparing epileptic-seizure-detection machine learning publications, traditional approach vs. the EPILEPSY BENCHMARKS workflow. This work involves adapting a publication to fit the standards of the platform.
