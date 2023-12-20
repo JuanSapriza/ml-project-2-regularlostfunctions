@@ -27,6 +27,8 @@ The process of submission to the platform, listed in Figure 1, include taking a 
 <p align="left"><img src="docs/work-diagram-report.png" width="1000"></p>
 Figure 1: Workflow of comparing epileptic-seizure-detection machine learning publications, traditional approach vs. the EPILEPSY BENCHMARKS workflow. This work involves adapting a publication to fit the standards of the platform.
 
+---
+
 This work will focus on the most \gls{ml}-related and demanding tasks, namely (1), (3) and (4).
 
 ---
