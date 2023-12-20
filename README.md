@@ -1,12 +1,12 @@
-# Reproduction and Integration of Epileptic Seizure Detection Algorithm into EPILEPSY BENCHMARKS
+# Reproduction and Adaptation of Epileptic Seizure Detection Algorithm into Standardization Framework
 ---
-## Regular Lost Functions - CS-433 - Project 2 (ML4Science) - Fall 2023
+## CS-433 - Project 2 (ML4Science) - Fall 2023
 
 **Author:** Juan Sapriza (juan.sapriza@epfl.ch)
 
 **Hosting Lab:** Embedded Systems Laboratory - EPFL, Lausanne
 
-**Supervisor:** Dr. Jonathan Dan
+**Supervisor:** Dr. Jonathan Dan (jonathan.dan@epfl.ch)
 
 ---
 
