@@ -1,10 +1,13 @@
-## Reproduction and Integration of Epileptic Seizure Detection Algorithm into EPILEPSY BENCHMARKS
+# Reproduction and Integration of Epileptic Seizure Detection Algorithm into EPILEPSY BENCHMARKS
 ---
 ## Regular Lost Functions - CS-433 - Project 2 (ML4Science) - Fall 2023
 
 **Author:** Juan Sapriza (juan.sapriza@epfl.ch)
+
 **Hosting Lab:** Embedded Systems Laboratory - EPFL, Lausanne
+
 **Supervisor:** Dr. Jonathan Dan
+
 ---
 
 ## Introduction
@@ -25,6 +28,7 @@ The process of submission to the platform, listed in Figure 1, include taking a 
 Figure 1: Workflow of comparing epileptic-seizure-detection machine learning publications, traditional approach vs. the EPILEPSY BENCHMARKS workflow. This work involves adapting a publication to fit the standards of the platform.
 
 This work will focus on the most \gls{ml}-related and demanding tasks, namely (1), (3) and (4).
+
 ---
 
 ## Baseline Publication
