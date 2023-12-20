@@ -1,0 +1,44 @@
+Loading EDF signals...
+Signals loaded!
+
+-----------------------------------------------------------
+
+Number of seizures available: 4
+Number of samples (not sequences): 19243260
+Interictal samples: 17275132 (89.77 %)
+Ictal samples: 1968128 (10.23 %)
+
+Number of sequences: 149914
+Interictal sequences: 134542 (89.75%)
+Ictal sequences: 15372 (10.25%)
+Number of batches: 2343
+
+-----------------------------------------------------------
+
+Calculating statistics to scale the data...
+Model: "model"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ input_1 (InputLayer)        [(None, 20, 256)]         0         
+                                                                 
+ gru (GRU)                   (None, 256)               394752    
+                                                                 
+ flatten (Flatten)           (None, 256)               0         
+                                                                 
+ dense (Dense)               (None, 256)               65792     
+                                                                 
+ batch_normalization (Batch  (None, 256)               1024      
+ Normalization)                                                  
+                                                                 
+ activation (Activation)     (None, 256)               0         
+                                                                 
+ dense_1 (Dense)             (None, 2)                 514       
+                                                                 
+ activation_1 (Activation)   (None, 2)                 0         
+                                                                 
+=================================================================
+Total params: 462082 (1.76 MB)
+Trainable params: 461570 (1.76 MB)
+Non-trainable params: 512 (2.00 KB)
+_________________________________________________________________

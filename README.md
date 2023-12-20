@@ -1,9 +1,10 @@
 ## Reproduction and Integration of Epileptic Seizure Detection Algorithm into EPILEPSY BENCHMARKS
 ---
 ## Regular Lost Functions - CS-433 - Project 2 (ML4Science) - Fall 2023
-### Authors: Mridhula Venkatanarayanan, Juan Sapriza & Kenta Yokote
-### Hosting Lab: Embedded Systems Laboratory - EPFL, Lausanne
-### Under supervision of Dr. Jonathan Dan
+
+**Author:** Juan Sapriza (juan.sapriza@epfl.ch)
+**Hosting Lab:** Embedded Systems Laboratory - EPFL, Lausanne
+**Supervisor:** Dr. Jonathan Dan
 ---
 
 ## Introduction
@@ -11,7 +12,7 @@
 Machine Learning (ML) has become a popular approach for the detection of epiletic seizures from Electroencephalograms (EEG). During the last years several datasets have been produced, both public and private. At the same time, abundant research has been carried out but without much consensus on the dataset to use, data format, cross-validation approach or figures of merit.
 In this light, the Embedded Systems Laboratory from EPFL is developing a standarization framework for seizure detection algorithms: [EPILEPSY BENCHMARKS](https://eslweb.epfl.ch/epilepsybenchmarks/framework/#tuh). Its goal is to harmonize the work of algorithm developers to offer a fair comparison between approaches.
 
-Our objectives during this project, listed in Figure 1, include taking a State-of-the-Art publication and:
+The process of submission to the platform, listed in Figure 1, include taking a State-of-the-Art publication and:
 1. Reproduce its reported results.
 2. Adapt the algorithm to work with the standardized-format dataset.
 3. Adapt the algorithm to perform the standardized cross-validation approach.
@@ -23,7 +24,7 @@ Our objectives during this project, listed in Figure 1, include taking a State-o
 <p align="left"><img src="docs/work-diagram-report.png" width="1000"></p>
 Figure 1: Workflow of comparing epileptic-seizure-detection machine learning publications, traditional approach vs. the EPILEPSY BENCHMARKS workflow. This work involves adapting a publication to fit the standards of the platform.
 
-
+This work will focus on the most \gls{ml}-related and demanding tasks, namely (1), (3) and (4).
 ---
 
 ## Baseline Publication
@@ -46,7 +47,7 @@ The code, [accessible on Github](https://github.com/deephealthproject/UC13_pipel
 ## Reproducibility
 
 This work's repository adapted the baseline repository to ease the process of reproducibility under the directory `baseline`. Inside it we added a `requirements.txt` file including the required python packages to be installed.
-The \chbmit data-set needs to be located as a soft link in `baseline/keras_pipeline/original_signals`.
+The CHB-MIT data-set needs to be located as a soft link in `baseline/keras_pipeline/original_signals`. This data-set is already available inside the ESL servers, or can be downloaded from the [Physionet webpage](https://physionet.org/content/chbmit/1.0.0/).
 
 Upon accessing such link folders named after each subject containing the `edf` file of each recording with their corresponding `.edf.seizures` file.
 
@@ -57,3 +58,10 @@ Running the `train.sh` script will take the pre-defined list of subjects and tra
 >Note that the final version of the repository includes a subdirectory `new` with the new proposed train/test division.
 
 The testing process is launched by running the `test.sh` script, which will look for models using the defined `subject` and `experiment` names. The testing recording are defined in a `test.txt` file along with its training counterparts.
+The training scheme will generate folders containing information on the best model parameters which is useful to keep track of the different experiments carried out. We manually rename the selected models as `subject_experiemnt` before the testing pass.
+
+---
+
+## Generating plots
+
+All plots are generated from the resulting experiments. Few values have been manually xtracted from files for simplicity. To generate the plots, run all cells in the notebook `generate_plots.ipynb`.
